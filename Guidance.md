@@ -31,43 +31,25 @@ findspark.init()
 ```
 4. Start Spark Session
 ```bash
+import pyspark
 from pyspark.sql import SparkSession
-
-spark = SparkSession.builder \
-    .appName("CustomerSegmentation") \
-    .config("spark.mongodb.output.uri", "mongodb+srv://<username>:<password>@<cluster-url>/retail.customers") \
-    .config("spark.mongodb.input.uri", "mongodb+srv://<username>:<password>@<cluster-url>/retail.customers") \
-    .getOrCreate()
+spark = SparkSession.builder.master("local")\
+          .appName("Spark APIs Exercises")\
+          .config("spark.some.config.option", "some-value")\
+          .getOrCreate()
 ```
-**Giải thích**  
-➡️ Cấu hình địa chỉ URI để ghi (output) dữ liệu Spark vào MongoDB.
+5. Read dataset
 ```bash
-.config("spark.mongodb.output.uri", "mongodb+srv://<username>:<password>@<cluster-url>/retail.customers") \
+linesDF = spark.read.csv("/content/Online Retail.csv")
+linesDF.show(5, truncate=False)
 ```
-➡️ Cấu hình địa chỉ URI để đọc (input) dữ liệu từ MongoDB vào Spark.
+6. Print Schema
 ```bash
-.config("spark.mongodb.input.uri", "mongodb+srv://<username>:<password>@<cluster-url>/retail.customers") \
-```
-➡️ Cú pháp URI MongoDB Atlas:
-```bash
-mongodb+srv://<username>:<password>@<cluster-url>/<database>.<collection>
-```
-5. Load and Clean the Dataset
-```bash
-# Download CSV
-!wget -O retail.csv https://raw.githubusercontent.com/christianversloot/machine-learning-articles/main/data/online_retail.csv
-
-df = spark.read.option("header", True).csv("retail.csv")
+df = spark.read.option("header", True).csv("/content/Online Retail.csv")
 df.printSchema()
-
-# Filter invalid rows
-from pyspark.sql.functions import col
-
-df_clean = df.filter((col("CustomerID").isNotNull()) & (col("Quantity") > 0) & (col("UnitPrice") > 0))
-df_clean = df_clean.withColumn("TotalPrice", col("Quantity") * col("UnitPrice"))
-df_clean = df_clean.select("CustomerID", "InvoiceNo", "TotalPrice")
-
 ```
+
+
 
 
 
